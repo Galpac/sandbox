@@ -1,5 +1,6 @@
 
 
+# We use iris and we create a new column as an id (index) Wich we want to retrieve as the outlier labels.
 
 iris2 = iris
 
