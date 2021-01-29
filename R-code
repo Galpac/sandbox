@@ -1,0 +1,87 @@
+
+
+
+iris2 = iris
+
+iris2$id = c(1:nrow(iris2))
+
+## And my function
+
+customPlot7 <- function(varName, df, paleta=mi_paleta, Var_by,var_id) {
+
+
+# varName is the variable where we search for outliers,
+
+# df is the dataframe.
+
+# paleta is for colors of the ggplot.
+
+# Varby is my factor variable (Species in the iris dataset)
+
+# var_id is the variable i wish to plot in the outliers to identify them instead of using the value.
+
+
+## This is for the colors
+
+mi_paleta = c("white", "red", "pink", "blue", "lightblue", "green", "lightgreen","brown4" ,"brown3")
+
+# Var_by = "Species"
+
+is_outlier <- function(x) {
+
+x < quantile(x, 0.25) - 1.5 * IQR(x) | x > quantile(x, 0.75) + 1.5 * IQR(x)
+
+}
+
+
+df %>%
+
+ggplot(aes_string(y=varName, x = Var_by, fill = Var_by,z=var_id)) + ## Cant add more colums here...
+
+geom_boxplot(outlier.size=4, outlier.color="red", outlier.fill="red") +
+
+scale_fill_manual(values = paleta) +
+
+stat_summary(fun=mean,
+
+geom="point",
+
+position=position_dodge(.9),
+
+color="black", size=4) +
+
+## But i cant change the stat sumary to retrieve values from other column!!!!!
+
+stat_summary(
+
+aes( label = stat(y)), # label = stat(x)), works, ploting the value of Species unfactored. 1 2 or 3 depending on the box nicely.
+
+geom = "text",
+
+fun = function(y) {
+
+o <- y[is_outlier(y)]
+
+if(length(o) == 0) NA else {o}
+
+},
+
+hjust = -.8
+
+)
+
+}
+
+
+# We run this code. That allows me to get a graph with the outliers but they are labeled with their values, and i want their values FROM the id column.
+library(ggplot2)
+
+library(dplyr)
+
+library(tidyverse)
+
+customPlot7(varName = "Sepal.Width",df = iris2,Var_by = "Species", var_id="Sepal.Width")
+
+
+
+
