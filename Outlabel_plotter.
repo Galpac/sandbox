@@ -1,0 +1,50 @@
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tibble)
+
+library(ggrepel)
+
+
+
+is_outlier <- function(x) {
+  
+  if (is.na(x)==FALSE) {
+  return(x < quantile(x, 0.25) - 1.5 * IQR(x) | x > quantile(x, 0.75) + 1.5 * IQR(x)) }
+  else{ return(FALSE)}
+  
+  
+}
+
+
+# mtcars2 <- mtcars %>% tibble::rownames_to_column(var="id") # we put a var "id" 
+# # varid -> variable id
+# # var1 -> variable to plot
+# # varby -> variable to factor boxplot
+# # vaird
+outlier_idplotter <- function(var1="drat",dat =mtcars2, varby="cyl",varid="id") { ## Had to change the order for the apply
+
+# varid = "id"
+# var1 = "mpg"
+# varby = "cyl"
+
+
+dat <- dat %>% group_by(!!sym(varby)) %>% mutate(var = (!!sym(var1)), funs(is_outlier= ifelse(is.na(!!sym(var1)),as.numeric(NA),
+                                                                    ifelse( is_outlier(!!sym(var1)),!!sym(var1), as.numeric(NA))) ) )
+  
+  
+ 
+
+
+
+## id = "something". ¿How do i call this?
+dat$id[which(is.na(dat$is_outlier))] <- as.numeric(NA)   # Dont want to do this.
+# dat[,"id"][which(is.na(dat[,"is_outlier"]))] <- as.numeric(NA) # Cant get this to work.
+
+# varid = "id"
+ggplot(dat, aes(y=!!sym(var1), x=factor(!!sym(varby)))) + geom_boxplot() + geom_text_repel(aes(label=!!sym(varid)),na.rm=TRUE,nudge_y=0.05)
+
+
+# p+geom_text_repel(data=filter(results, padj<0.05), aes(label=Gene))
+}
+```
