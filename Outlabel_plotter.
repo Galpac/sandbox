@@ -1,3 +1,6 @@
+SOLUTION AT THE END (2 sols, one with filter other with an argument)
+
+
 ```{r}
 mtcars2 <- mtcars %>% tibble::rownames_to_column(var="id") # we put a var "id"
 # varid -> variable id
@@ -74,4 +77,113 @@ mtcars2_out[15,4] <- NA
 ```{r}
 
 lapply(mt_lista,outlier_idplotter,dat =mtcars2_out, varby="cyl",varid="id")
+```
+
+
+
+#SOLUTION 1
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tibble)
+
+library(ggrepel)
+
+
+
+is_outlier <- function(x) {
+    
+    x < quantile(x, 0.25, na.rm = TRUE) - 1.5 * IQR(x, na.rm = TRUE) | x > quantile(x, 0.75, na.rm = TRUE) + 1.5 * IQR (x, na.rm = TRUE) }
+
+  
+  
+
+
+
+# mtcars2 <- mtcars %>% tibble::rownames_to_column(var="id") # we put a var "id" 
+# # varid -> variable id
+# # var1 -> variable que se plotea
+# # varby -> variable que diferencia los boxplot
+# # vaird
+outlier_idplotter_na <- function(var1="drat",dat =mtcars2, varby="cyl",varid="id") { ## Had to change the order for the apply
+
+# varid = "id"
+# var1 = "mpg"
+# varby = "cyl"
+
+  
+dat <-dat %>% filter(!is.na(!!sym(var1)))       ### ASI SI. NO TOCAR.
+
+dat <- dat %>% group_by(!!sym(varby)) %>% mutate(is_outlier=ifelse(is_outlier(!!sym(var1)),!!sym(var1), as.numeric(NA)))
+
+# SOLUTION 2 (PREFILTERING)
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tibble)
+
+library(ggrepel)
+
+
+
+is_outlier <- function(x) {
+  
+  # I could also land here a quantile(na.rm = TRUE)
+  
+
+  return(x < quantile(x, 0.25) - 1.5 * IQR(x) | x > quantile(x, 0.75) + 1.5 * IQR(x)) }
+
+  
+  
+
+
+
+# mtcars2 <- mtcars %>% tibble::rownames_to_column(var="id") # we put a var "id" 
+# # varid -> variable id
+# # var1 -> variable que se plotea
+# # varby -> variable que diferencia los boxplot
+# # vaird
+outlier_idplotter <- function(var1="drat",dat =mtcars2, varby="cyl",varid="id") { ## Had to change the order for the apply
+
+# varid = "id"
+# var1 = "mpg"
+# varby = "cyl"
+
+  
+dat <-dat %>% filter(!is.na(!!sym(var1)))       ### ASI SI. NO TOCAR.
+
+dat <- dat %>% group_by(!!sym(varby)) %>% mutate(is_outlier=ifelse(is_outlier(!!sym(var1)),!!sym(var1), as.numeric(NA)))
+
+
+
+## id = "something". ¿How do i call this?
+dat$id[which(is.na(dat$is_outlier))] <- as.numeric(NA)   # Dont want to do this.
+# dat[,"id"][which(is.na(dat[,"is_outlier"]))] <- as.numeric(NA) # Cant get this to work.
+
+# varid = "id"
+# ggplot(dat, aes(y=!!sym(var1), x=factor(!!sym(varby)))) + geom_boxplot() + geom_text_repel(aes(label=!!sym(varid)),na.rm=TRUE,nudge_y=0.05)
+ggplot(dat, aes(y=!!sym(var1), x=factor(!!sym(varby))   )) + geom_boxplot() + geom_text_repel(aes(label=!!sym(varid)),na.rm=TRUE,nudge_y=0.05)
+
+
+# p+geom_text_repel(data=filter(results, padj<0.05), aes(label=Gene))
+}
+```
+
+
+## id = "something". ¿How do i call this?
+dat$id[which(is.na(dat$is_outlier))] <- as.numeric(NA)   # Dont want to do this.
+# dat[,"id"][which(is.na(dat[,"is_outlier"]))] <- as.numeric(NA) # Cant get this to work.
+
+# varid = "id"
+# ggplot(dat, aes(y=!!sym(var1), x=factor(!!sym(varby)))) + geom_boxplot() + geom_text_repel(aes(label=!!sym(varid)),na.rm=TRUE,nudge_y=0.05)
+ggplot(dat, aes(y=!!sym(var1), x=factor(!!sym(varby))   )) + geom_boxplot() + geom_text_repel(aes(label=!!sym(varid)),na.rm=TRUE,nudge_y=0.05)
+
+
+# p+geom_text_repel(data=filter(results, padj<0.05), aes(label=Gene))
+}
+```
+```{r}
+lapply(names_of_numerics,outlier_idplotter_na,dat =BBDD_circ, varby="Etiología",varid="id") #something
 ```
